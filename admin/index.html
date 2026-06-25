@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MBA Feed Admin</title>
+  <style>
+    :root { --bg:#0f172a; --bg2:#1e293b; --bg3:#334155; --text:#f1f5f9; --muted:#94a3b8; --border:rgba(255,255,255,0.08); --accent:#6366f1; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; min-height:100vh; }
+    .hdr { background:var(--bg2); border-bottom:1px solid var(--border); padding:16px 20px; display:flex; align-items:center; gap:12px; }
+    .hdr h1 { font-size:18px; }
+    .hdr a { color:var(--muted); font-size:13px; margin-left:auto; text-decoration:none; }
+    .main { max-width:700px; margin:0 auto; padding:20px; display:flex; flex-direction:column; gap:20px; }
+    .card { background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:20px; }
+    h2 { font-size:16px; font-weight:700; margin-bottom:14px; }
+    label { display:block; font-size:13px; color:var(--muted); margin-bottom:6px; }
+    input[type=password], input[type=text], textarea, select {
+      width:100%; background:var(--bg3); border:1px solid var(--border); border-radius:8px;
+      padding:10px 12px; color:var(--text); font:inherit; font-size:14px;
+    }
+    input:focus, textarea:focus { outline:none; border-color:var(--accent); }
+    .btn { background:var(--accent); color:#fff; border-radius:8px; padding:10px 18px; font-size:14px; font-weight:600; cursor:pointer; border:none; transition:opacity 0.15s; }
+    .btn:hover { opacity:0.85; }
+    .btn-sec { background:var(--bg3); color:var(--text); }
+    .row { display:flex; gap:10px; align-items:flex-end; }
+    .row > * { flex:1; }
+    .msg { font-size:13px; padding:10px 12px; border-radius:8px; margin-top:10px; }
+    .msg.ok  { background:rgba(34,197,94,0.15); color:#22c55e; }
+    .msg.err { background:rgba(239,68,68,0.15);  color:#ef4444; }
+    .hidden { display:none; }
+    #login-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; gap:16px; }
+    #login-screen .card { width:100%; max-width:380px; }
+    .schema-block { background:var(--bg3); border-radius:8px; padding:14px; font-size:12px; line-height:1.7; font-family:monospace; overflow-x:auto; white-space:pre; }
+    .prompt-block { background:var(--bg3); border-radius:8px; padding:14px; font-size:13px; line-height:1.7; color:var(--muted); }
+    .post-preview { border:1px solid var(--border); border-radius:10px; padding:12px; font-size:13px; display:flex; flex-direction:column; gap:6px; }
+    .pp-type { font-size:11px; font-weight:700; color:var(--accent); text-transform:uppercase; }
+    .pp-title { font-weight:600; }
+    .pending-list { display:flex; flex-direction:column; gap:10px; }
+    .pp-actions { display:flex; gap:8px; margin-top:6px; }
+    .pp-actions button { font-size:12px; padding:5px 12px; border-radius:6px; }
+    .rec-list { display:flex; flex-direction:column; gap:10px; }
+    .rec-item { background:var(--bg3); border-radius:8px; padding:12px; font-size:13px; }
+    .rec-book { font-weight:700; margin-bottom:2px; }
+    .rec-why { color:var(--muted); }
+    .rec-pillar { font-size:11px; color:var(--accent); font-weight:600; margin-top:4px; }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="card">
+    <h2>🔐 Admin Access</h2>
+    <div style="height:12px"></div>
+    <label>PIN</label>
+    <input type="password" id="pin-input" placeholder="Enter PIN" onkeydown="if(event.key==='Enter')login()">
+    <div style="height:10px"></div>
+    <button class="btn" style="width:100%" onclick="login()">Unlock</button>
+    <div id="pin-msg" class="msg hidden"></div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="admin-panel" class="hidden">
+  <div class="hdr">
+    <span>📚</span>
+    <h1>MBA Feed Admin</h1>
+    <a href="../">← Back to Feed</a>
+  </div>
+
+  <div class="main">
+
+    <!-- IMPORT JSON -->
+    <div class="card">
+      <h2>📥 Import Posts (JSON)</h2>
+      <label>Paste JSON array of posts</label>
+      <textarea id="import-json" rows="8" placeholder='[{"id":"...","type":"quote",...}]'></textarea>
+      <div style="height:10px"></div>
+      <div class="row">
+        <button class="btn btn-sec" onclick="previewImport()">Preview</button>
+        <button class="btn" onclick="importPosts()">Import to Sheet</button>
+      </div>
+      <div id="import-msg" class="msg hidden"></div>
+      <div id="import-preview" class="pending-list" style="margin-top:14px"></div>
+    </div>
+
+    <!-- GENERATE PROMPT -->
+    <div class="card">
+      <h2>🤖 Generate New Posts</h2>
+      <label>Book Title</label>
+      <input type="text" id="book-title" placeholder="e.g. Influence by Robert Cialdini">
+      <div style="height:10px"></div>
+      <label>Number of posts to generate</label>
+      <select id="post-count">
+        <option value="10">10 posts</option>
+        <option value="20" selected>20 posts</option>
+        <option value="30">30 posts</option>
+      </select>
+      <div style="height:12px"></div>
+      <button class="btn" onclick="generatePrompt()">Copy Prompt to Clipboard</button>
+      <div id="prompt-output" class="hidden" style="margin-top:14px">
+        <label>Paste into Claude or ChatGPT:</label>
+        <div id="prompt-text" class="prompt-block" style="margin-top:6px"></div>
+      </div>
+    </div>
+
+    <!-- JSON SCHEMA -->
+    <div class="card">
+      <h2>📋 Post JSON Schema</h2>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Use this format when generating or importing posts.</p>
+      <div class="schema-block" id="schema-display"></div>
+    </div>
+
+    <!-- RECOMMENDED BOOKS -->
+    <div class="card">
+      <h2>📚 Recommended Additional Books</h2>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px">10-15 titles to fill gaps in your MBA curriculum.</p>
+      <div class="rec-list" id="rec-books"></div>
+    </div>
+
+    <!-- FREE RESOURCES -->
+    <div class="card">
+      <h2>🔗 Free Resources by Pillar</h2>
+      <div id="free-resources" style="display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+
+    <!-- PROGRESS RESET -->
+    <div class="card">
+      <h2>⚙️ Data Management</h2>
+      <div class="row">
+        <button class="btn btn-sec" onclick="exportProgress()">Export Progress JSON</button>
+        <button class="btn" style="background:#ef4444" onclick="nukeProgress()">Reset All Progress</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const ADMIN_PIN = '1234'; // Change this
+
+function login() {
+  const pin = document.getElementById('pin-input').value;
+  const msg = document.getElementById('pin-msg');
+  if (pin === ADMIN_PIN) {
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('admin-panel').classList.remove('hidden');
+    initAdmin();
+  } else {
+    msg.className = 'msg err'; msg.textContent = 'Wrong PIN.'; msg.classList.remove('hidden');
+  }
+}
+
+function initAdmin() {
+  renderSchema();
+  renderRecommended();
+  renderResources();
+}
+
+function previewImport() {
+  const raw = document.getElementById('import-json').value.trim();
+  const previewEl = document.getElementById('import-preview');
+  const msg = document.getElementById('import-msg');
+  try {
+    const posts = JSON.parse(raw);
+    if (!Array.isArray(posts)) throw new Error('Expected an array');
+    previewEl.innerHTML = posts.map(p => `
+      <div class="post-preview">
+        <div class="pp-type">${p.type || 'unknown'}</div>
+        <div class="pp-title">${p.bookTitle || 'No book'} — ${p.author || ''}</div>
+        <div style="color:var(--muted);font-size:12px">${(p.pillars||[]).join(', ')} · ${p.difficulty||''}</div>
+        <div class="pp-actions">
+          <button class="btn btn-sec" onclick="this.closest('.post-preview').style.opacity='0.4'">Skip</button>
+          <span style="font-size:11px;color:var(--muted);align-self:center">ID: ${p.id}</span>
+        </div>
+      </div>`).join('');
+    msg.className = 'msg ok'; msg.textContent = `✓ ${posts.length} posts parsed successfully.`; msg.classList.remove('hidden');
+  } catch (e) {
+    msg.className = 'msg err'; msg.textContent = 'Invalid JSON: ' + e.message; msg.classList.remove('hidden');
+    previewEl.innerHTML = '';
+  }
+}
+
+function importPosts() {
+  const raw = document.getElementById('import-json').value.trim();
+  const msg = document.getElementById('import-msg');
+  try {
+    const posts = JSON.parse(raw);
+    // Save to localStorage as pending (in a real setup, POST to Apps Script)
+    const existing = JSON.parse(localStorage.getItem('mba_imported_posts') || '[]');
+    const merged = [...existing, ...posts];
+    localStorage.setItem('mba_imported_posts', JSON.stringify(merged));
+    msg.className = 'msg ok'; msg.textContent = `✓ ${posts.length} posts saved to local storage. Configure Apps Script URL in config.js to sync to Sheets.`;
+    msg.classList.remove('hidden');
+  } catch (e) {
+    msg.className = 'msg err'; msg.textContent = 'Error: ' + e.message; msg.classList.remove('hidden');
+  }
+}
+
+function generatePrompt() {
+  const title = document.getElementById('book-title').value.trim();
+  const count = document.getElementById('post-count').value;
+  if (!title) { alert('Enter a book title first.'); return; }
+  const prompt = buildPrompt(title, count);
+  navigator.clipboard.writeText(prompt).catch(() => {});
+  document.getElementById('prompt-text').textContent = prompt;
+  document.getElementById('prompt-output').classList.remove('hidden');
+}
+
+function buildPrompt(title, count) {
+  return `Generate ${count} post cards for the Personal MBA Feed app from the book "${title}".
+
+Return a valid JSON array. Each post MUST follow this schema exactly:
+{
+  "id": "unique-slug-001",
+  "type": "quote|framework|insight|carousel|quiz|stat|reflection|summary",
+  "bookId": "url-safe-book-id",
+  "bookTitle": "${title}",
+  "author": "Author Name",
+  "pillars": ["one or more of: Strategy, Finance, Leadership, Operations, Marketing, Systems Thinking, Personal Development, Communication, Entrepreneurship, Product Management"],
+  "difficulty": "Beginner|Intermediate|Advanced",
+  "content": { /* type-specific, see schema below */ }
+}
+
+CONTENT SCHEMAS BY TYPE:
+
+quote:    { "quote": "...", "context": "brief context sentence" }
+framework:{ "title": "...", "subtitle": "...", "items": [{"label":"...","color":"#hex"}], "insight": "real-world application" }
+insight:  { "headline": "...", "body": "3-5 sentences", "example": "real-world example" }
+carousel: { "title": "...", "slides": [{"title":"...","body":"..."}] } // 3-5 slides
+quiz:     { "questions": [{"q":"...","options":["A","B","C","D"],"correct":0,"explanation":"..."}] } // 2-4 questions
+stat:     { "number": "42%", "label": "what this measures", "context": "why it matters" }
+reflection: { "prompt": "context from the book", "question": "journaling/scenario question" }
+summary:  { "premise": "core thesis", "takeaways": ["1","2","3"], "bestQuote": "...", "nextRead": "book + why" }
+
+Mix types evenly. Make quiz questions scenario-based (real decisions, not just recall). Make stat cards visually striking. Include at least 2 framework cards, 2 quiz cards, 1 summary card, and 2 reflection cards.
+
+Return ONLY the JSON array. No markdown, no explanation.`;
+}
+
+const SCHEMA = `// Example: quiz post
+{
+  "id": "book-slug-001",
+  "type": "quiz",
+  "bookId": "book-slug",
+  "bookTitle": "Book Title",
+  "author": "Author Name",
+  "pillars": ["Strategy", "Leadership"],
+  "difficulty": "Intermediate",
+  "content": {
+    "questions": [
+      {
+        "q": "Scenario-based question?",
+        "options": ["Option A", "Option B", "Option C", "Option D"],
+        "correct": 1,
+        "explanation": "Why this answer is correct."
+      }
+    ]
+  }
+}
+
+// Example: quote post
+{
+  "id": "book-slug-002",
+  "type": "quote",
+  "bookId": "book-slug",
+  "bookTitle": "Book Title",
+  "author": "Author Name",
+  "pillars": ["Personal Development"],
+  "difficulty": "Beginner",
+  "content": {
+    "quote": "The quote text.",
+    "context": "Context about the book and why this quote matters."
+  }
+}`;
+
+function renderSchema() {
+  document.getElementById('schema-display').textContent = SCHEMA;
+}
+
+const RECOMMENDED = [
+  { title: "Never Split the Difference", author: "Chris Voss", pillar: "Communication / Negotiation", why: "FBI hostage negotiator. Best modern negotiation book — tactical empathy, mirroring, calibrated questions." },
+  { title: "The Psychology of Money", author: "Morgan Housel", pillar: "Finance / Personal Development", why: "Fills a key gap: the behavioral and emotional side of financial decisions your list doesn't cover." },
+  { title: "Zero to One", author: "Peter Thiel", pillar: "Entrepreneurship / Strategy", why: "Counter to Lean Startup — argues for bold secrets and monopolies, not incremental iterations." },
+  { title: "Influence: Science and Practice", author: "Robert Cialdini", pillar: "Marketing / Communication", why: "Six principles of persuasion. Essential paired with your existing Communication titles." },
+  { title: "An Elegant Puzzle", author: "Will Larson", pillar: "Leadership / Operations", why: "Systems thinking applied to engineering organizations — rare, practical, and deeply operational." },
+  { title: "The Mom Test", author: "Rob Fitzpatrick", pillar: "Entrepreneurship / Product Management", why: "How to validate ideas without being lied to by well-meaning people. Perfect complement to Lean Startup." },
+  { title: "Misbehaving", author: "Richard Thaler", pillar: "Systems Thinking / Finance", why: "Behavioral economics in practice — how real humans deviate from rational models, with policy implications." },
+  { title: "Crossing the Chasm", author: "Geoffrey Moore", pillar: "Marketing / Strategy", why: "B2B and tech product marketing. Fills a gap in your Marketing pillar with a durable framework." },
+  { title: "The Hard Thing About Hard Things", author: "Ben Horowitz", pillar: "Entrepreneurship / Leadership", why: "Raw, unfiltered startup leadership in crisis. Pairs with all your leadership books." },
+  { title: "Working Backwards", author: "Colin Bryar & Bill Carr", pillar: "Product Management / Operations", why: "Amazon's operating system — press releases, 6-pagers, leadership principles in practice." },
+  { title: "Predictably Irrational", author: "Dan Ariely", pillar: "Marketing / Systems Thinking", why: "How irrational behavior follows patterns — pricing, anchoring, relativity. Deepens your Marketing pillar." },
+  { title: "Good Strategy / Bad Strategy", author: "Richard Rumelt", pillar: "Strategy", why: "Most strategy is fluff. Rumelt defines what a kernel of good strategy actually looks like." },
+  { title: "The Checklist Manifesto", author: "Atul Gawande", pillar: "Operations / Leadership", why: "How structured processes reduce failure in high-stakes work. Bridges your Operations and Leadership pillars." },
+  { title: "Amp It Up", author: "Frank Slootman", pillar: "Leadership / Operations", why: "How to dramatically raise standards and execution pace in an organization. Rare operational intensity." },
+  { title: "Monetizing Innovation", author: "Madhavan Ramaswami", pillar: "Strategy / Marketing", why: "How to build pricing into product design from day one. Fills a gap in your Finance + Marketing pillars." },
+];
+
+function renderRecommended() {
+  document.getElementById('rec-books').innerHTML = RECOMMENDED.map(r => `
+    <div class="rec-item">
+      <div class="rec-book">${r.title} <span style="font-weight:400;color:var(--muted)">— ${r.author}</span></div>
+      <div class="rec-why">${r.why}</div>
+      <div class="rec-pillar">📌 ${r.pillar}</div>
+    </div>`).join('');
+}
+
+const RESOURCES = [
+  { pillar: 'Strategy', items: [
+    { name: 'Stanford Strategy Lectures (YouTube)', url: 'https://youtube.com/@stanfordgsb', desc: 'Free business school content' },
+    { name: 'HBR Idea Cast Podcast', url: 'https://hbr.org/2018/01/podcast-ideacast', desc: 'Harvard Business Review weekly' },
+  ]},
+  { pillar: 'Finance', items: [
+    { name: 'Aswath Damodaran YouTube', url: 'https://youtube.com/@AswathDamodaranonValuation', desc: 'NYU professor, best free finance education online' },
+    { name: 'Plain Bagel (YouTube)', url: 'https://youtube.com/@ThePlainBagel', desc: 'Investing concepts explained clearly' },
+  ]},
+  { pillar: 'Leadership', items: [
+    { name: 'How to Start a Startup (YC, YouTube)', url: 'https://youtube.com/playlist?list=PL5q_lef6zVkaTY_cT1k7qFNF2TidHCe-1', desc: 'Y Combinator + Stanford leadership series' },
+    { name: 'Dare to Lead podcast (Brené Brown)', url: 'https://brenebrown.com/podcast/dare-to-lead-podcast/', desc: 'Vulnerability and courage in leadership' },
+  ]},
+  { pillar: 'Operations', items: [
+    { name: 'Lean Enterprise Institute', url: 'https://www.lean.org/resources/', desc: 'Free Lean thinking resources and case studies' },
+    { name: 'Operations Management (MIT OCW)', url: 'https://ocw.mit.edu/courses/15-761-operations-management-spring-2000/', desc: 'Full MIT course, free' },
+  ]},
+  { pillar: 'Marketing', items: [
+    { name: 'Seth Godin Blog (daily)', url: 'https://seths.blog', desc: 'Best free marketing thinking, daily, short' },
+    { name: 'Marketing Over Coffee Podcast', url: 'https://www.marketingovercoffee.com/', desc: 'Practical marketing tactics weekly' },
+  ]},
+  { pillar: 'Systems Thinking', items: [
+    { name: 'Systems Thinking for Social Change (book PDF)', url: 'https://donellameadows.org/systems-thinking-resources/', desc: 'Donella Meadows Institute free resources' },
+    { name: 'Introduction to Systems Thinking (Kim)', url: 'https://thesystemsthinker.com/', desc: 'Systems Thinker journal archives' },
+  ]},
+  { pillar: 'Personal Development', items: [
+    { name: 'Tim Ferriss Show Podcast', url: 'https://tim.blog/podcast/', desc: 'Top performers sharing mental models and routines' },
+    { name: 'Huberman Lab Podcast', url: 'https://hubermanlab.com/podcast/', desc: 'Neuroscience of peak performance and habits' },
+  ]},
+  { pillar: 'Entrepreneurship', items: [
+    { name: 'Y Combinator YouTube', url: 'https://youtube.com/@ycombinator', desc: 'Startup school, founder interviews, how YC thinks' },
+    { name: 'Indie Hackers Community', url: 'https://www.indiehackers.com/', desc: 'Real revenue numbers from bootstrapped founders' },
+  ]},
+  { pillar: 'Product Management', items: [
+    { name: 'Lenny\'s Newsletter + Podcast', url: 'https://www.lennysnewsletter.com/', desc: 'Best PM content on the internet, some free' },
+    { name: 'ProductHunt YouTube (PM talks)', url: 'https://youtube.com/@ProductHunt', desc: 'Product leaders sharing processes and frameworks' },
+  ]},
+];
+
+function renderResources() {
+  document.getElementById('free-resources').innerHTML = RESOURCES.map(r => `
+    <div style="background:var(--bg3);border-radius:10px;padding:12px">
+      <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:8px">${r.pillar}</div>
+      ${r.items.map(i => `
+        <div style="margin-bottom:8px">
+          <a href="${i.url}" target="_blank" rel="noopener" style="color:var(--text);font-size:13px;font-weight:600;text-decoration:underline">${i.name}</a>
+          <div style="font-size:12px;color:var(--muted)">${i.desc}</div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+function exportProgress() {
+  const data = localStorage.getItem('mba_progress_v1') || '{}';
+  const blob = new Blob([data], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'mba-progress.json'; a.click();
+}
+
+function nukeProgress() {
+  if (!confirm('Delete ALL progress? This cannot be undone.')) return;
+  localStorage.removeItem('mba_progress_v1');
+  alert('Progress reset.');
+}
+</script>
+</body>
+</html>
