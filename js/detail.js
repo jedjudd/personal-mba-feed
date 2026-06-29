@@ -153,6 +153,12 @@ const DetailView = {
     this.goto(this.current + 1);
   },
 
+  handleNext() {
+    const btn = document.getElementById('dl-next');
+    if (btn && btn.dataset.locked) return;
+    this.next();
+  },
+
   prev() { this.goto(this.current - 1); },
 
   _bindSwipe(el) {
@@ -190,7 +196,7 @@ const DetailView = {
           <div class="dl-nav">
             <button class="dl-nav-btn" id="dl-prev" onclick="DetailView.prev()">‹</button>
             <div class="dl-dots" id="dl-dots"></div>
-            <button class="dl-nav-btn" id="dl-next" onclick="DetailView.next()">›</button>
+            <button class="dl-nav-btn" id="dl-next" onclick="DetailView.handleNext()">›</button>
           </div>
           <div class="dl-actions">
             <button class="dl-act ${liked ? 'dl-act--liked' : ''}" id="dl-like-btn" onclick="DetailView.toggleLike()">
@@ -240,7 +246,7 @@ const DetailView = {
       nextBtn.style.background = (!locked && isLast) ? '#6366f1' : '';
       nextBtn.style.color = (!locked && isLast) ? '#fff' : '';
       nextBtn.style.opacity = locked ? '0.25' : '1';
-      nextBtn.onclick = locked ? null : isLast ? () => DetailView.close() : () => DetailView.next();
+      nextBtn.dataset.locked = locked ? '1' : '';
     }
 
     const area = document.getElementById('dl-slide-area');
