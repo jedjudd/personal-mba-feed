@@ -1,4 +1,4 @@
-const CACHE = 'mba-v3';
+const CACHE = 'mba-v4';
 const STATIC = [
   '/personal-mba-feed/',
   '/personal-mba-feed/index.html',
@@ -28,12 +28,10 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
-  // Network-first for API calls (Apps Script)
-  if (url.hostname.includes('script.google.com')) {
+  // Network-first for API calls and the admin page (always fresh)
+  if (url.hostname.includes('script.google.com') || url.pathname.includes('/admin/')) {
     e.respondWith(
-      fetch(e.request).catch(() => new Response('{"error":"offline"}', {
-        headers: { 'Content-Type': 'application/json' }
-      }))
+      fetch(e.request).catch(() => caches.match(e.request))
     );
     return;
   }
