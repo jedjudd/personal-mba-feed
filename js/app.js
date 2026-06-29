@@ -19,6 +19,7 @@ const App = {
     this.setupIntersectionObserver();
     this.setupFilterBar();
     this.setupCommentModal();
+    this.setupCardTap();
     registerSW();
   },
 
@@ -189,6 +190,22 @@ const App = {
     this.allLoaded = false;
     document.getElementById('feed-list').innerHTML = '';
     this.loadMoreFeed();
+  },
+
+  setupCardTap() {
+    const handler = e => {
+      if (e.target.closest('.card-actions')) return;
+      if (e.target.closest('.quiz-option')) return;
+      if (e.target.closest('.carousel-arrow')) return;
+      if (e.target.closest('.dot')) return;
+      if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON') return;
+      const card = e.target.closest('.card');
+      if (card && card.dataset.id) openDetailView(card.dataset.id);
+    };
+    ['feed-list', 'bookmarks-list'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('click', handler);
+    });
   },
 
   setupCommentModal() {

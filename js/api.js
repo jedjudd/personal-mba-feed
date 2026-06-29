@@ -87,13 +87,47 @@ async function apiPost(body) {
   }
 }
 
+// ── FEED SHUFFLE ──────────────────────────────────────────────────────────────
+const _feedShuffles = new Map(); // pillarFilter -> shuffled posts array
+
+function _shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function getShuffledFeed(pillarFilter) {
+  const key = pillarFilter || '__all__';
+  if (!_feedShuffles.has(key)) {
+    let posts = pillarFilter
+      ? SEED_POSTS.filter(p => p.pillars && p.pillars.includes(pillarFilter))
+      : SEED_POSTS;
+    // Group by book, shuffle within each group, then round-robin interleave
+    const byBook = {};
+    posts.forEach(p => { const k = p.bookId || 'misc'; (byBook[k] = byBook[k] || []).push(p); });
+    const queues = _shuffle(Object.values(byBook)).map(g => _shuffle(g));
+    const result = [];
+    while (queues.some(q => q.length > 0)) {
+      queues.forEach(q => { if (q.length > 0) result.push(q.shift()); });
+    }
+    _feedShuffles.set(key, result);
+  }
+  return _feedShuffles.get(key);
+}
+
 // ── DATA ACCESS ───────────────────────────────────────────────────────────────
 async function fetchFeed(page = 1, pillarFilter = null) {
   const params = { action: 'feed', page, limit: CONFIG.postsPerPage };
   if (pillarFilter) params.pillar = pillarFilter;
   const remote = await apiFetch(params);
-  // If Apps Script isn't configured yet, return embedded seed
-  if (!remote) return { posts: SEED_POSTS.slice((page - 1) * CONFIG.postsPerPage, page * CONFIG.postsPerPage), total: SEED_POSTS.length };
+  if (!remote) {
+    const shuffled = getShuffledFeed(pillarFilter);
+    const start = (page - 1) * CONFIG.postsPerPage;
+    return { posts: shuffled.slice(start, start + CONFIG.postsPerPage), total: shuffled.length };
+  }
   return remote;
 }
 
