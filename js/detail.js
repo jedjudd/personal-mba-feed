@@ -288,8 +288,10 @@ const DetailView = {
         if (oi === q.correct) cls += ' correct';
         else if (oi === answered) cls += ' wrong';
       }
+      // Use data attributes to avoid quote-escaping issues in onclick
       return `<button class="${cls}" ${answered !== undefined ? 'disabled' : ''}
-        onclick="DetailView.answerQuiz(${JSON.stringify(qi)},${oi},${q.correct})">
+        data-qi="${qi}" data-opt="${oi}" data-correct="${q.correct}"
+        onclick="DetailView.answerQuiz(this.dataset.qi,+this.dataset.opt,+this.dataset.correct)">
         <span class="opt-letter">${String.fromCharCode(65 + oi)}</span>${opt}
       </button>`;
     }).join('');
@@ -310,6 +312,7 @@ const DetailView = {
   answerQuiz(qi, selected, correct) {
     if (this.quizAnswered[qi] !== undefined) return;
     this.quizAnswered[qi] = selected;
+    Log.info('quiz_answer', `qi=${qi} selected=${selected} correct=${correct} isCorrect=${selected===correct}`);
     this.renderSlide();
     App.renderHeader();
   },

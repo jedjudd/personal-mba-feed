@@ -134,6 +134,16 @@
       </div>
     </div>
 
+    <!-- AUDIT LOG -->
+    <div class="card">
+      <h2>🪵 Audit Log <span style="font-size:12px;font-weight:400;color:var(--muted)">(last 10 events from the feed app)</span></h2>
+      <div class="row" style="margin-bottom:12px">
+        <button class="btn btn-sec" onclick="renderAuditLog()">Refresh</button>
+        <button class="btn" style="background:#ef4444" onclick="clearAuditLog()">Clear Log</button>
+      </div>
+      <div id="audit-log-entries"></div>
+    </div>
+
   </div>
 </div>
 
@@ -156,6 +166,33 @@ function initAdmin() {
   renderSchema();
   renderRecommended();
   renderResources();
+  renderAuditLog();
+}
+
+function renderAuditLog() {
+  const el = document.getElementById('audit-log-entries');
+  let entries = [];
+  try { entries = JSON.parse(localStorage.getItem('mba_audit_log') || '[]'); } catch {}
+  const last10 = entries.slice(0, 10);
+  if (!last10.length) {
+    el.innerHTML = '<p style="font-size:13px;color:var(--muted)">No log entries yet. Use the feed app and refresh.</p>';
+    return;
+  }
+  const levelColor = { info: '#6366f1', warn: '#f97316', error: '#ef4444' };
+  el.innerHTML = last10.map(e => `
+    <div style="padding:10px 0;border-bottom:1px solid var(--border);font-size:13px">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:3px">
+        <span style="color:${levelColor[e.level]||'#94a3b8'};font-weight:700;text-transform:uppercase;font-size:11px">${e.level}</span>
+        <span style="color:var(--muted);font-size:11px">${new Date(e.ts).toLocaleTimeString()}</span>
+      </div>
+      <div style="font-weight:600;color:var(--text)">${e.msg}</div>
+      ${e.detail ? `<div style="color:var(--muted);font-size:12px;margin-top:2px">${e.detail}</div>` : ''}
+    </div>`).join('');
+}
+
+function clearAuditLog() {
+  localStorage.removeItem('mba_audit_log');
+  renderAuditLog();
 }
 
 function previewImport() {

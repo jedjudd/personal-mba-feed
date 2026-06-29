@@ -6,6 +6,10 @@ const SHEET_ID = SpreadsheetApp.getActiveSpreadsheet().getId();
 
 // ── ROUTER ────────────────────────────────────────────────────────────────────
 function doGet(e) {
+  // Guard: running directly from editor sends no event object
+  if (!e || !e.parameter) {
+    return jsonResponse({ status: 'ok', message: 'Deploy as Web App to use. Run seedSheets() to initialize.' });
+  }
   const action = e.parameter.action || 'feed';
   let result;
   try {
