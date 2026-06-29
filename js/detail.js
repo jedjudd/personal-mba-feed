@@ -201,6 +201,10 @@ const DetailView = {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="${bookmarked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
               Save
             </button>
+            <button class="dl-act" onclick="DetailView.share()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              Share
+            </button>
             <button class="dl-act dl-act--done" onclick="DetailView.close()">Done</button>
           </div>
         </div>
@@ -286,6 +290,31 @@ const DetailView = {
     if (selected === correct) showToast('+10 XP!');
     this.renderSlide();
     App.renderHeader();
+  },
+
+  share() {
+    const slide = this.slides[this.current];
+    const post = this.post;
+
+    // Build share text from the current slide's content
+    let excerpt = '';
+    if (slide.type === 'quiz' && slide.quiz) {
+      excerpt = slide.quiz.q;
+    } else if (slide.body) {
+      // Strip HTML tags to get plain text
+      const tmp = document.createElement('div');
+      tmp.innerHTML = slide.body;
+      excerpt = tmp.textContent.trim().substring(0, 200);
+    }
+    if (!excerpt) excerpt = slide.title || post.bookTitle;
+
+    const text = `📚 ${slide.title ? slide.title + '\n\n' : ''}${excerpt}\n\n— ${post.bookTitle} by ${post.author}\n\nFrom The Personal MBA Feed`;
+
+    if (navigator.share) {
+      navigator.share({ title: `${post.bookTitle} — ${slide.label || 'Insight'}`, text });
+    } else {
+      navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard'));
+    }
   },
 
   toggleLike() {
