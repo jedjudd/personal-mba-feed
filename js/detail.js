@@ -215,6 +215,10 @@ const DetailView = {
   renderSlide() {
     const slide = this.slides[this.current];
     const total = this.slides.length;
+    const isLast = this.current === total - 1;
+    const isQuizSlide = slide.type === 'quiz' && slide.quiz;
+    const qi = isQuizSlide ? (slide.quiz.qi !== undefined ? slide.quiz.qi : 'gen') : null;
+    const quizAnswered = isQuizSlide && this.quizAnswered[qi] !== undefined;
 
     const prog = document.getElementById('dl-progress');
     if (prog) prog.style.width = (((this.current + 1) / total) * 100) + '%';
@@ -231,15 +235,17 @@ const DetailView = {
 
     const nextBtn = document.getElementById('dl-next');
     if (nextBtn) {
-      const isLast = this.current === total - 1;
-      nextBtn.textContent = isLast ? '✓' : '›';
-      nextBtn.style.background = isLast ? '#6366f1' : '';
-      nextBtn.style.color = isLast ? '#fff' : '';
+      const locked = isLast && isQuizSlide && !quizAnswered;
+      nextBtn.textContent = locked ? '—' : isLast ? '✓' : '›';
+      nextBtn.style.background = (!locked && isLast) ? '#6366f1' : '';
+      nextBtn.style.color = (!locked && isLast) ? '#fff' : '';
+      nextBtn.style.opacity = locked ? '0.25' : '1';
+      nextBtn.onclick = locked ? null : isLast ? () => DetailView.close() : () => DetailView.next();
     }
 
     const area = document.getElementById('dl-slide-area');
     if (area) {
-      area.innerHTML = slide.type === 'quiz' && slide.quiz
+      area.innerHTML = isQuizSlide
         ? this._renderQuizSlide(slide)
         : this._renderContentSlide(slide);
       area.scrollTop = 0;
@@ -262,16 +268,26 @@ const DetailView = {
     const q = slide.quiz;
     const qi = q.qi !== undefined ? q.qi : 'gen';
     const answered = this.quizAnswered[qi];
+    const isCorrect = answered !== undefined && answered === q.correct;
+
+    const resultBanner = answered !== undefined ? `
+      <div class="dl-quiz-result ${isCorrect ? 'dl-quiz-result--correct' : 'dl-quiz-result--wrong'}">
+        <span class="dl-quiz-result-icon">${isCorrect ? '✓' : '✗'}</span>
+        <span>${isCorrect ? 'Correct!' : 'Not quite — see the explanation below'}</span>
+      </div>` : '';
+
     const opts = (q.options || []).map((opt, oi) => {
       let cls = 'dl-quiz-opt';
       if (answered !== undefined) {
-        cls += oi === q.correct ? ' correct' : oi === answered ? ' wrong' : '';
+        if (oi === q.correct) cls += ' correct';
+        else if (oi === answered) cls += ' wrong';
       }
       return `<button class="${cls}" ${answered !== undefined ? 'disabled' : ''}
         onclick="DetailView.answerQuiz(${JSON.stringify(qi)},${oi},${q.correct})">
         <span class="opt-letter">${String.fromCharCode(65 + oi)}</span>${opt}
       </button>`;
     }).join('');
+
     return `
       <div class="dl-slide">
         <div class="dl-slide-eyebrow">
@@ -279,15 +295,15 @@ const DetailView = {
           <span class="dl-slide-label">${slide.label}</span>
         </div>
         <p class="dl-quiz-q">${q.q}</p>
+        ${resultBanner}
         <div class="dl-quiz-opts">${opts}</div>
-        ${answered !== undefined ? `<div class="dl-explanation">${q.explanation || ''}</div>` : ''}
+        ${answered !== undefined ? `<div class="dl-explanation">${q.explanation || ''}</div>` : '<p class="dl-quiz-hint">Tap an option to answer</p>'}
       </div>`;
   },
 
   answerQuiz(qi, selected, correct) {
     if (this.quizAnswered[qi] !== undefined) return;
     this.quizAnswered[qi] = selected;
-    if (selected === correct) showToast('+10 XP!');
     this.renderSlide();
     App.renderHeader();
   },
