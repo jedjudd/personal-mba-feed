@@ -279,8 +279,7 @@ function saveApiUrl() {
   localStorage.setItem('mba_api_url', url);
   const status = document.getElementById('api-url-status');
   if (status) status.textContent = url ? '✓ Connected' : 'Not set — using local data';
-  // Clear cached API responses so next feed load uses the new URL
-  cacheClear('api_');
+  cacheClear();
   App.resetFeed();
   showToast(url ? 'API URL saved — reloading feed…' : 'URL cleared — using local data');
 }

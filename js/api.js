@@ -1,16 +1,18 @@
 // ── LOCAL CACHE ──────────────────────────────────────────────────────────────
+const CACHE_PREFIX = 'mba_cache_';
+
 function cacheGet(key) {
   try {
-    const raw = localStorage.getItem('mba_' + key);
+    const raw = localStorage.getItem(CACHE_PREFIX + key);
     if (!raw) return null;
     const { data, ts, ttl } = JSON.parse(raw);
-    if (Date.now() - ts > ttl) { localStorage.removeItem('mba_' + key); return null; }
+    if (Date.now() - ts > ttl) { localStorage.removeItem(CACHE_PREFIX + key); return null; }
     return data;
   } catch { return null; }
 }
 
 function cacheSet(key, data, ttl = CONFIG.cacheTTL) {
-  try { localStorage.setItem('mba_' + key, JSON.stringify({ data, ts: Date.now(), ttl })); }
+  try { localStorage.setItem(CACHE_PREFIX + key, JSON.stringify({ data, ts: Date.now(), ttl })); }
   catch { /* storage full — skip */ }
 }
 
@@ -18,7 +20,7 @@ function cacheClear(prefix = '') {
   const keys = [];
   for (let i = 0; i < localStorage.length; i++) {
     const k = localStorage.key(i);
-    if (k && k.startsWith('mba_' + prefix)) keys.push(k);
+    if (k && k.startsWith(CACHE_PREFIX + prefix)) keys.push(k);
   }
   keys.forEach(k => localStorage.removeItem(k));
 }
