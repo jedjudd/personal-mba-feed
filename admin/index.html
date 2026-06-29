@@ -64,7 +64,7 @@
       <div style="height:10px"></div>
       <div class="row">
         <button class="btn btn-sec" onclick="previewImport()">Preview</button>
-        <button class="btn" onclick="importPosts()">Import to Sheet</button>
+        <button class="btn" onclick="importPosts()">Send to Google Sheet</button>
       </div>
       <div id="import-msg" class="msg hidden"></div>
       <div id="import-preview" class="pending-list" style="margin-top:14px"></div>
@@ -208,20 +208,41 @@ function previewImport() {
   }
 }
 
-function importPosts() {
+async function importPosts() {
   const raw = document.getElementById('import-json').value.trim();
   const msg = document.getElementById('import-msg');
+  let posts;
   try {
-    const posts = JSON.parse(raw);
-    // Save to localStorage as pending (in a real setup, POST to Apps Script)
-    const existing = JSON.parse(localStorage.getItem('mba_imported_posts') || '[]');
-    const merged = [...existing, ...posts];
-    localStorage.setItem('mba_imported_posts', JSON.stringify(merged));
-    msg.className = 'msg ok'; msg.textContent = `✓ ${posts.length} posts saved to local storage. Configure Apps Script URL in config.js to sync to Sheets.`;
-    msg.classList.remove('hidden');
+    posts = JSON.parse(raw);
+    if (!Array.isArray(posts)) throw new Error('Expected a JSON array');
   } catch (e) {
-    msg.className = 'msg err'; msg.textContent = 'Error: ' + e.message; msg.classList.remove('hidden');
+    msg.className = 'msg err'; msg.textContent = 'Invalid JSON: ' + e.message; msg.classList.remove('hidden');
+    return;
   }
+
+  const apiUrl = localStorage.getItem('mba_api_url') || '';
+  if (!apiUrl) {
+    msg.className = 'msg err'; msg.textContent = 'No Apps Script URL saved — go to Settings in the main app and save your URL first.'; msg.classList.remove('hidden');
+    return;
+  }
+
+  msg.className = 'msg ok'; msg.textContent = `Sending ${posts.length} posts to Google Sheet…`; msg.classList.remove('hidden');
+
+  try {
+    const res = await fetch(apiUrl, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'importPosts', posts }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      msg.className = 'msg ok'; msg.textContent = `✓ ${data.imported} posts imported to Google Sheet successfully!`;
+    } else {
+      msg.className = 'msg err'; msg.textContent = 'Sheet error: ' + (data.error || JSON.stringify(data));
+    }
+  } catch (e) {
+    msg.className = 'msg err'; msg.textContent = 'Network error: ' + e.message;
+  }
+  msg.classList.remove('hidden');
 }
 
 function generatePrompt() {
