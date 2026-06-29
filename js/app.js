@@ -49,7 +49,7 @@ const App = {
     if (tab === 'feed' && this.feedPosts.length === 0) {
       await this.loadMoreFeed();
     } else if (tab === 'dashboard') {
-      renderDashboard();
+      await renderDashboard();
     } else if (tab === 'bookmarks') {
       await this.loadBookmarks();
     } else if (tab === 'profile') {
@@ -246,6 +246,23 @@ const App = {
 };
 
 // ── GLOBALS ───────────────────────────────────────────────────────────────────
+function goToPillar(pillarName) {
+  App.pillarFilter = pillarName || null;
+  // Switch to feed section
+  App.activeTab = 'feed';
+  App.renderNav();
+  ['feed-section', 'dashboard-section', 'bookmarks-section', 'profile-section'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('hidden', id !== 'feed-section');
+  });
+  // Update filter bar
+  const bar = document.getElementById('pillar-filter');
+  if (bar) bar.querySelectorAll('.filter-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.pillar === (pillarName || '')));
+  // Reload feed with new filter
+  App.resetFeed();
+}
+
 function buildAuditLogHtml() {
   let entries = [];
   try { entries = JSON.parse(localStorage.getItem('mba_audit_log') || '[]'); } catch {}

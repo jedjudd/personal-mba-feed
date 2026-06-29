@@ -573,3 +573,87 @@ a { color: inherit; text-decoration: none; }
 .dl-act--liked { color: #ef4444; }
 .dl-act--saved { color: #f97316; }
 .dl-act--done  { background: #6366f1; color: #fff; border-color: transparent; flex: 1.2; }
+
+/* ── PILLAR CARD ADDITIONS ───────────────────────────────────────────────── */
+.pc-viewed { font-size: 11px; color: #22c55e; margin-top: 4px; }
+
+/* ── GAP ANALYSIS ADDITIONS ──────────────────────────────────────────────── */
+.gap-item { cursor: pointer; transition: border-color 0.15s; }
+.gap-item:active { border-color: #6366f1; }
+.gap-avail { font-size: 12px; color: var(--subtle); margin-bottom: 8px; }
+.gap-action {
+  margin-top: 10px; font-size: 12px; font-weight: 700;
+  color: #6366f1; text-align: right;
+}
+
+/* ── BOOK LIBRARY ─────────────────────────────────────────────────────────── */
+.book-library { display: flex; flex-direction: column; gap: 8px; }
+.bl-book {
+  display: flex; align-items: stretch;
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden; cursor: pointer;
+  transition: border-color 0.15s;
+}
+.bl-book:active { border-color: var(--bc, #6366f1); }
+.bl-spine { width: 5px; flex-shrink: 0; }
+.bl-info { flex: 1; padding: 12px 12px 10px; min-width: 0; }
+.bl-title { font-size: 14px; font-weight: 700; line-height: 1.3; }
+.bl-author { font-size: 12px; color: var(--muted); margin: 2px 0 7px; }
+.bl-pillars { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+.bl-pillars .pillar-tag { font-size: 10px; padding: 2px 7px; }
+.bl-stats { display: flex; gap: 10px; font-size: 11px; color: var(--subtle); flex-wrap: wrap; margin-bottom: 8px; }
+.bl-viewed { color: #22c55e; font-weight: 600; }
+.bl-xp { color: #6366f1; font-weight: 600; }
+.bl-prog-wrap { height: 3px; background: var(--bg3); border-radius: 2px; overflow: hidden; }
+.bl-prog { height: 100%; border-radius: 2px; transition: width 0.4s; }
+.bl-arrow { display: flex; align-items: center; padding: 0 14px; color: var(--subtle); font-size: 20px; }
+
+/* ── BOOK OVERLAY ─────────────────────────────────────────────────────────── */
+.book-overlay {
+  position: fixed; inset: 0; z-index: 400;
+  background: rgba(0,0,0,0.65);
+  display: flex; align-items: flex-end;
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.bov-container {
+  width: 100%; max-height: 88vh; overflow-y: auto;
+  background: var(--bg2); border-radius: 20px 20px 0 0;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp { from { transform: translateY(40px); } to { transform: none; } }
+.bov-header {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 16px 16px 12px; border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; background: var(--bg2); z-index: 1;
+}
+.bov-close {
+  width: 30px; height: 30px; border-radius: 50%; background: var(--bg3);
+  font-size: 13px; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; color: var(--muted); margin-top: 2px;
+}
+.bov-meta { flex: 1; min-width: 0; }
+.bov-title { font-size: 16px; font-weight: 700; line-height: 1.3; }
+.bov-author { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.bov-stats {
+  display: flex; padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.bov-stat { flex: 1; text-align: center; padding: 6px 4px; }
+.bov-n { display: block; font-size: 20px; font-weight: 800; }
+.bov-l { display: block; font-size: 10px; color: var(--muted); margin-top: 2px; }
+.bov-pillars { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.bov-cards { display: flex; flex-direction: column; gap: 4px; padding: 12px 16px; }
+.bov-card {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 12px; background: var(--bg3); border-radius: 10px;
+  cursor: pointer; transition: background 0.15s; gap: 10px;
+}
+.bov-card--viewed { background: rgba(34,197,94,0.07); border: 1px solid rgba(34,197,94,0.15); }
+.bov-card:active { opacity: 0.7; }
+.bov-card-left { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.bov-card-type { font-size: 11px; font-weight: 700; text-transform: capitalize; }
+.bov-card-preview { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bov-card-icons { font-size: 13px; color: var(--muted); flex-shrink: 0; white-space: nowrap; }
+.bov-seen { color: #22c55e; font-weight: 700; }

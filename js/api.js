@@ -43,6 +43,7 @@ const Progress = {
       postsRead: 0, booksEngaged: 0, booksRead: [], quizzesCompleted: 0,
       likeCount: 0, bookmarkCount: 0, commentCount: 0,
       pillarEngaged: {}, pillarCorrect: {}, pillarQuestions: {},
+      postsViewed: {}, booksEngagedIds: [],
     };
   },
   update(fn) {
@@ -139,6 +140,14 @@ async function fetchBooks() {
   return remote;
 }
 
+async function fetchAllPosts() {
+  if (CONFIG.appsScriptUrl) {
+    const data = await apiFetch({ action: 'feed', page: 1, limit: 9999 });
+    if (data?.posts?.length) return data.posts;
+  }
+  return SEED_POSTS;
+}
+
 async function fetchBookmarks() {
   const p = Progress.get();
   const ids = Object.keys(p.bookmarks).filter(id => p.bookmarks[id]);
@@ -201,14 +210,22 @@ function recordQuizResult(postId, correct, total, pillars) {
 
 function recordPostRead(post) {
   Progress.update(p => {
+    if (!p.postsViewed) p.postsViewed = {};
+    if (p.postsViewed[post.id]) return; // deduplicate — only count first view
+    p.postsViewed[post.id] = true;
     p.postsRead = (p.postsRead || 0) + 1;
     (post.pillars || []).forEach(pillar => {
       p.pillarEngaged[pillar] = (p.pillarEngaged[pillar] || 0) + 1;
     });
-    if (post.bookId && !p.booksRead.includes(post.bookId)) {
-      // check if all posts for this book are read
+    if (post.bookId) {
+      if (!p.booksEngagedIds) p.booksEngagedIds = [];
+      if (!p.booksEngagedIds.includes(post.bookId)) {
+        p.booksEngagedIds.push(post.bookId);
+        p.booksEngaged = p.booksEngagedIds.length;
+      }
     }
   });
+  checkBadges();
 }
 
 function updateStreak() {
