@@ -272,8 +272,8 @@ function showBadgeToast(badge) {
 function saveApiUrl() {
   const input = document.getElementById('api-url-input');
   const url = input?.value.trim() || '';
-  if (url && !url.startsWith('https://script.google.com/macros/s/')) {
-    showToast('URL should start with https://script.google.com/macros/s/');
+  if (url && !url.startsWith('https://')) {
+    showToast('URL must start with https://');
     return;
   }
   localStorage.setItem('mba_api_url', url);

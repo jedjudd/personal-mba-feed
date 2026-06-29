@@ -1,14 +1,17 @@
-const CACHE = 'mba-v1';
+const CACHE = 'mba-v3';
 const STATIC = [
   '/personal-mba-feed/',
   '/personal-mba-feed/index.html',
   '/personal-mba-feed/css/app.css',
+  '/personal-mba-feed/js/log.js',
   '/personal-mba-feed/js/config.js',
   '/personal-mba-feed/js/seed-data.js',
   '/personal-mba-feed/js/api.js',
   '/personal-mba-feed/js/cards.js',
   '/personal-mba-feed/js/dashboard.js',
+  '/personal-mba-feed/js/detail.js',
   '/personal-mba-feed/js/app.js',
+  '/personal-mba-feed/admin/index.html',
   '/personal-mba-feed/manifest.json',
 ];
 

@@ -125,6 +125,20 @@
       <div id="free-resources" style="display:flex;flex-direction:column;gap:10px"></div>
     </div>
 
+    <!-- APPS SCRIPT URL -->
+    <div class="card">
+      <h2>🔗 Apps Script URL</h2>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Connect to your Google Sheets backend. Leave blank to use local seed data.</p>
+      <label>Deployment URL</label>
+      <input type="url" id="admin-api-url" placeholder="https://script.google.com/macros/s/…/exec">
+      <div style="height:10px"></div>
+      <div class="row">
+        <button class="btn btn-sec" onclick="clearApiUrl()">Clear URL</button>
+        <button class="btn" onclick="saveApiUrlAdmin()">Save URL</button>
+      </div>
+      <div id="api-url-msg" class="msg hidden"></div>
+    </div>
+
     <!-- PROGRESS RESET -->
     <div class="card">
       <h2>⚙️ Data Management</h2>
@@ -132,6 +146,8 @@
         <button class="btn btn-sec" onclick="exportProgress()">Export Progress JSON</button>
         <button class="btn" style="background:#ef4444" onclick="nukeProgress()">Reset All Progress</button>
       </div>
+      <div style="height:10px"></div>
+      <button class="btn btn-sec" style="width:100%" onclick="clearSWCache()">Force App Update (clear cache)</button>
     </div>
 
     <!-- AUDIT LOG -->
@@ -167,6 +183,8 @@ function initAdmin() {
   renderRecommended();
   renderResources();
   renderAuditLog();
+  const savedUrl = localStorage.getItem('mba_api_url') || '';
+  document.getElementById('admin-api-url').value = savedUrl;
 }
 
 function renderAuditLog() {
@@ -392,6 +410,36 @@ function renderResources() {
           <div style="font-size:12px;color:var(--muted)">${i.desc}</div>
         </div>`).join('')}
     </div>`).join('');
+}
+
+function saveApiUrlAdmin() {
+  const url = document.getElementById('admin-api-url').value.trim();
+  const msg = document.getElementById('api-url-msg');
+  if (url && !url.startsWith('https://')) {
+    msg.className = 'msg err'; msg.textContent = 'URL must start with https://'; msg.classList.remove('hidden');
+    return;
+  }
+  localStorage.setItem('mba_api_url', url);
+  msg.className = 'msg ok'; msg.textContent = url ? '✓ URL saved.' : '✓ URL cleared — app will use local data.'; msg.classList.remove('hidden');
+}
+
+function clearApiUrl() {
+  document.getElementById('admin-api-url').value = '';
+  saveApiUrlAdmin();
+}
+
+function clearSWCache() {
+  if ('caches' in window) {
+    caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).then(() => {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
+      }
+      alert('Cache cleared. The app will reload with fresh files.');
+      location.reload(true);
+    });
+  } else {
+    alert('Cache API not available in this browser.');
+  }
 }
 
 function exportProgress() {
