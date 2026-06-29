@@ -1,4 +1,4 @@
-const CACHE = 'mba-v4';
+const CACHE = 'mba-v5';
 const STATIC = [
   '/personal-mba-feed/',
   '/personal-mba-feed/index.html',

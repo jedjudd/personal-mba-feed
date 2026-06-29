@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>MBA Feed Admin</title>
-  <script src="../js/seed-data.js"></script>
   <style>
     :root { --bg:#0f172a; --bg2:#1e293b; --bg3:#334155; --text:#f1f5f9; --muted:#94a3b8; --border:rgba(255,255,255,0.08); --accent:#6366f1; }
     * { box-sizing:border-box; margin:0; padding:0; }
@@ -56,14 +55,6 @@
   </div>
 
   <div class="main">
-
-    <!-- SEED SHEET -->
-    <div class="card">
-      <h2>🌱 Seed Sheet with Built-in Posts</h2>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:14px">First time setup: push all <span id="seed-count">…</span> built-in seed posts to your Google Sheet so they appear alongside any new posts you import.</p>
-      <button class="btn" onclick="seedSheet()">Send Built-in Posts to Sheet</button>
-      <div id="seed-msg" class="msg hidden"></div>
-    </div>
 
     <!-- IMPORT JSON -->
     <div class="card">
@@ -119,20 +110,6 @@
       <div id="free-resources" style="display:flex;flex-direction:column;gap:10px"></div>
     </div>
 
-    <!-- APPS SCRIPT URL -->
-    <div class="card">
-      <h2>🔗 Apps Script URL</h2>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Connect to your Google Sheets backend. Leave blank to use local seed data.</p>
-      <label>Deployment URL</label>
-      <input type="url" id="admin-api-url" placeholder="https://script.google.com/macros/s/…/exec">
-      <div style="height:10px"></div>
-      <div class="row">
-        <button class="btn btn-sec" onclick="clearApiUrl()">Clear URL</button>
-        <button class="btn" onclick="saveApiUrlAdmin()">Save URL</button>
-      </div>
-      <div id="api-url-msg" class="msg hidden"></div>
-    </div>
-
     <!-- PROGRESS RESET -->
     <div class="card">
       <h2>⚙️ Data Management</h2>
@@ -144,16 +121,6 @@
       <button class="btn btn-sec" style="width:100%" onclick="clearSWCache()">Force App Update (clear cache)</button>
     </div>
 
-    <!-- AUDIT LOG -->
-    <div class="card">
-      <h2>🪵 Audit Log <span style="font-size:12px;font-weight:400;color:var(--muted)">(last 10 events from the feed app)</span></h2>
-      <div class="row" style="margin-bottom:12px">
-        <button class="btn btn-sec" onclick="renderAuditLog()">Refresh</button>
-        <button class="btn" style="background:#ef4444" onclick="clearAuditLog()">Clear Log</button>
-      </div>
-      <div id="audit-log-entries"></div>
-    </div>
-
   </div>
 </div>
 
@@ -162,66 +129,6 @@ function initAdmin() {
   renderSchema();
   renderRecommended();
   renderResources();
-  renderAuditLog();
-  const savedUrl = localStorage.getItem('mba_api_url') || '';
-  document.getElementById('admin-api-url').value = savedUrl;
-  const countEl = document.getElementById('seed-count');
-  if (countEl && typeof SEED_POSTS !== 'undefined') countEl.textContent = SEED_POSTS.length;
-}
-
-async function seedSheet() {
-  const msg = document.getElementById('seed-msg');
-  const apiUrl = localStorage.getItem('mba_api_url') || '';
-  if (!apiUrl) {
-    msg.className = 'msg err'; msg.textContent = 'No Apps Script URL saved — scroll down and save your URL first.'; msg.classList.remove('hidden');
-    return;
-  }
-  if (typeof SEED_POSTS === 'undefined' || !SEED_POSTS.length) {
-    msg.className = 'msg err'; msg.textContent = 'Seed data not loaded.'; msg.classList.remove('hidden');
-    return;
-  }
-  msg.className = 'msg ok'; msg.textContent = `Sending ${SEED_POSTS.length} built-in posts to Google Sheet…`; msg.classList.remove('hidden');
-  try {
-    const res = await fetch(apiUrl, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'importPosts', posts: SEED_POSTS }),
-    });
-    const data = await res.json();
-    if (data.ok) {
-      msg.className = 'msg ok'; msg.textContent = `✓ ${data.imported} built-in posts added to your Google Sheet!`;
-    } else {
-      msg.className = 'msg err'; msg.textContent = 'Sheet error: ' + (data.error || JSON.stringify(data));
-    }
-  } catch (e) {
-    msg.className = 'msg err'; msg.textContent = 'Network error: ' + e.message;
-  }
-  msg.classList.remove('hidden');
-}
-
-function renderAuditLog() {
-  const el = document.getElementById('audit-log-entries');
-  let entries = [];
-  try { entries = JSON.parse(localStorage.getItem('mba_audit_log') || '[]'); } catch {}
-  const last10 = entries.slice(0, 10);
-  if (!last10.length) {
-    el.innerHTML = '<p style="font-size:13px;color:var(--muted)">No log entries yet. Use the feed app and refresh.</p>';
-    return;
-  }
-  const levelColor = { info: '#6366f1', warn: '#f97316', error: '#ef4444' };
-  el.innerHTML = last10.map(e => `
-    <div style="padding:10px 0;border-bottom:1px solid var(--border);font-size:13px">
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:3px">
-        <span style="color:${levelColor[e.level]||'#94a3b8'};font-weight:700;text-transform:uppercase;font-size:11px">${e.level}</span>
-        <span style="color:var(--muted);font-size:11px">${new Date(e.ts).toLocaleTimeString()}</span>
-      </div>
-      <div style="font-weight:600;color:var(--text)">${e.msg}</div>
-      ${e.detail ? `<div style="color:var(--muted);font-size:12px;margin-top:2px">${e.detail}</div>` : ''}
-    </div>`).join('');
-}
-
-function clearAuditLog() {
-  localStorage.removeItem('mba_audit_log');
-  renderAuditLog();
 }
 
 function previewImport() {
@@ -442,22 +349,6 @@ function renderResources() {
           <div style="font-size:12px;color:var(--muted)">${i.desc}</div>
         </div>`).join('')}
     </div>`).join('');
-}
-
-function saveApiUrlAdmin() {
-  const url = document.getElementById('admin-api-url').value.trim();
-  const msg = document.getElementById('api-url-msg');
-  if (url && !url.startsWith('https://')) {
-    msg.className = 'msg err'; msg.textContent = 'URL must start with https://'; msg.classList.remove('hidden');
-    return;
-  }
-  localStorage.setItem('mba_api_url', url);
-  msg.className = 'msg ok'; msg.textContent = url ? '✓ URL saved.' : '✓ URL cleared — app will use local data.'; msg.classList.remove('hidden');
-}
-
-function clearApiUrl() {
-  document.getElementById('admin-api-url').value = '';
-  saveApiUrlAdmin();
 }
 
 function clearSWCache() {

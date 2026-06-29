@@ -157,7 +157,15 @@ const App = {
         </div>
         <button class="setting-row setting-btn" onclick="location.href='admin/'">Admin Panel</button>
         <button class="setting-row setting-btn danger" onclick="resetProgress()">Reset Progress</button>
-      </div>`;
+      </div>
+      <div class="section-head" style="display:flex;align-items:center;justify-content:space-between">
+        <span>Audit Log</span>
+        <span style="display:flex;gap:8px">
+          <button class="filter-btn" onclick="renderProfileAuditLog()" style="font-size:12px;padding:4px 10px">Refresh</button>
+          <button class="filter-btn" onclick="clearProfileAuditLog()" style="font-size:12px;padding:4px 10px;color:#ef4444">Clear</button>
+        </span>
+      </div>
+      <div id="profile-audit-log" style="margin-bottom:24px">${buildAuditLogHtml()}</div>`;
   },
 
   setupIntersectionObserver() {
@@ -238,6 +246,33 @@ const App = {
 };
 
 // ── GLOBALS ───────────────────────────────────────────────────────────────────
+function buildAuditLogHtml() {
+  let entries = [];
+  try { entries = JSON.parse(localStorage.getItem('mba_audit_log') || '[]'); } catch {}
+  const last10 = entries.slice(0, 10);
+  if (!last10.length) return '<p class="empty-msg">No log entries yet.</p>';
+  const levelColor = { info: '#6366f1', warn: '#f97316', error: '#ef4444' };
+  return last10.map(e => `
+    <div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:13px">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:3px">
+        <span style="color:${levelColor[e.level]||'#94a3b8'};font-weight:700;text-transform:uppercase;font-size:11px">${e.level}</span>
+        <span style="color:var(--muted);font-size:11px">${new Date(e.ts).toLocaleTimeString()}</span>
+      </div>
+      <div style="font-weight:600">${e.msg}</div>
+      ${e.detail ? `<div style="color:var(--muted);font-size:12px;margin-top:2px">${e.detail}</div>` : ''}
+    </div>`).join('');
+}
+
+function renderProfileAuditLog() {
+  const el = document.getElementById('profile-audit-log');
+  if (el) el.innerHTML = buildAuditLogHtml();
+}
+
+function clearProfileAuditLog() {
+  localStorage.removeItem('mba_audit_log');
+  renderProfileAuditLog();
+}
+
 function switchTab(tab) { App.loadTab(tab); }
 
 function toggleDark(cb) {
