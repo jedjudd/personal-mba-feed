@@ -12,6 +12,12 @@ const SEED_BOOKS = [
   { id: 'made-to-stick',   title: 'Made to Stick',                   author: 'Chip Heath',         pillars: ['Communication','Marketing'],       color: '#ec4899', status: 'read', rating: 5 },
   { id: 'the-goal',        title: 'The Goal',                        author: 'Eliyahu Goldratt',   pillars: ['Operations','Systems Thinking'],   color: '#14b8a6', status: 'read', rating: 5 },
   { id: 'thinking-systems',title: 'Thinking in Systems',             author: 'Donella Meadows',    pillars: ['Systems Thinking'],               color: '#14b8a6', status: 'read', rating: 5 },
+  { id: 'zero-to-one',     title: 'Zero to One',                     author: 'Peter Thiel',        pillars: ['Entrepreneurship','Strategy'],     color: '#6366f1', status: 'unread', rating: 5 },
+  { id: 'never-split',     title: 'Never Split the Difference',      author: 'Chris Voss',         pillars: ['Communication','Leadership'],      color: '#ec4899', status: 'unread', rating: 5 },
+  { id: 'influence',       title: 'Influence',                       author: 'Robert Cialdini',    pillars: ['Marketing','Communication'],       color: '#ef4444', status: 'unread', rating: 5 },
+  { id: 'innovators-dilemma', title: "The Innovator's Dilemma",      author: 'Clayton Christensen',pillars: ['Strategy','Operations'],           color: '#3b82f6', status: 'unread', rating: 5 },
+  { id: 'hard-thing',      title: 'The Hard Thing About Hard Things',author: 'Ben Horowitz',       pillars: ['Leadership','Entrepreneurship'],   color: '#f43f5e', status: 'unread', rating: 5 },
+  { id: 'crossing-chasm',  title: 'Crossing the Chasm',              author: 'Geoffrey Moore',     pillars: ['Marketing','Strategy'],            color: '#14b8a6', status: 'unread', rating: 4 },
 ];
 
 // ── SEED POSTS ────────────────────────────────────────────────────────────────
@@ -560,6 +566,272 @@ const SEED_POSTS = [
       number: '72 years',
       label: 'for atmospheric CO₂ to respond to policy changes',
       context: 'Meadows\'s example of why systems with long delays are so hard to manage: by the time you see the problem clearly, the cause is decades in the past. This applies to organizational culture, supply chains, and education outcomes too.',
+    },
+  },
+
+  // ── ZERO TO ONE (Peter Thiel) ──
+  {
+    id: 'z2o-001', type: 'quote', bookId: 'zero-to-one',
+    bookTitle: 'Zero to One', author: 'Peter Thiel',
+    pillars: ['Entrepreneurship','Strategy'], difficulty: 'Intermediate',
+    content: {
+      quote: 'Every moment in business happens only once. The next Bill Gates will not build an operating system. The next Larry Page will not make a search engine.',
+      context: 'Thiel\'s core argument: copying something that already exists — going from 1 to n — is far less valuable than creating something genuinely new: going from 0 to 1.',
+    },
+  },
+  {
+    id: 'z2o-002', type: 'framework', bookId: 'zero-to-one',
+    bookTitle: 'Zero to One', author: 'Peter Thiel',
+    pillars: ['Strategy','Entrepreneurship'], difficulty: 'Advanced',
+    content: {
+      title: 'The Monopoly Characteristics',
+      subtitle: 'Four traits that distinguish durable technology monopolies',
+      items: [
+        { label: 'Proprietary Technology — 10x better than nearest substitute', color: '#6366f1' },
+        { label: 'Network Effects — more valuable as more people use it', color: '#3b82f6' },
+        { label: 'Economies of Scale — marginal cost approaches zero', color: '#a855f7' },
+        { label: 'Branding — the last legal monopoly anyone can own', color: '#ec4899' },
+      ],
+      insight: 'Every great business is defined by its secret monopoly on something: a better technology, a direct relationship with users, or a brand that signals status. Competition is for losers — monopoly profits fund R&D, good employee treatment, and long-term thinking.',
+    },
+  },
+  {
+    id: 'z2o-003', type: 'insight', bookId: 'zero-to-one',
+    bookTitle: 'Zero to One', author: 'Peter Thiel',
+    pillars: ['Entrepreneurship'], difficulty: 'Intermediate',
+    content: {
+      headline: 'Start Small, Dominate Completely',
+      body: 'Every startup should start with a very small market. The reason is simple: it\'s easier to dominate a small market than a large one. Amazon started with books. Facebook started with Harvard. eBay started with Beanie Babies. Find the smallest market where you can be #1.',
+      example: 'PayPal\'s initial market was PowerSellers on eBay — about 20,000 people who needed to send money online. By owning them completely, PayPal built the credibility and infrastructure to expand everywhere else.',
+    },
+  },
+  {
+    id: 'z2o-004', type: 'quiz', bookId: 'zero-to-one',
+    bookTitle: 'Zero to One', author: 'Peter Thiel',
+    pillars: ['Strategy','Entrepreneurship'], difficulty: 'Advanced',
+    content: {
+      questions: [
+        {
+          q: 'According to Thiel, why should startups avoid competitive markets?',
+          options: ['They require too much marketing spend', 'Competition eliminates profits needed for long-term investment', 'Large markets have too many regulations', 'Competition slows down hiring'],
+          correct: 1,
+          explanation: 'In perfectly competitive markets, all profits get competed away. Only monopolies have the margin to invest in R&D, people, and the future. This is why Thiel argues "competition is for losers."',
+        },
+        {
+          q: 'What does "0 to 1" mean in Thiel\'s framework?',
+          options: ['Growing a company from zero revenue to $1M', 'Creating something genuinely new vs. copying', 'The first hire in a startup', 'Moving from idea to prototype'],
+          correct: 1,
+          explanation: '"1 to n" is copying — making more of what already exists. "0 to 1" is creation — bringing something new into the world. Thiel argues only 0-to-1 companies create real value and durable competitive advantage.',
+        },
+      ],
+    },
+  },
+
+  // ── NEVER SPLIT THE DIFFERENCE (Chris Voss) ──
+  {
+    id: 'nstd-001', type: 'quote', bookId: 'never-split',
+    bookTitle: 'Never Split the Difference', author: 'Chris Voss',
+    pillars: ['Communication','Leadership'], difficulty: 'Beginner',
+    content: {
+      quote: 'He who has learned to disagree without being disagreeable has discovered the most valuable secret of negotiation.',
+      context: 'Voss spent 24 years as an FBI hostage negotiator. His insight: negotiation isn\'t about compromise — it\'s about deeply understanding the other side\'s fears, desires, and emotional drivers.',
+    },
+  },
+  {
+    id: 'nstd-002', type: 'framework', bookId: 'never-split',
+    bookTitle: 'Never Split the Difference', author: 'Chris Voss',
+    pillars: ['Communication'], difficulty: 'Intermediate',
+    content: {
+      title: 'The Tactical Empathy Toolkit',
+      subtitle: 'FBI-tested techniques that work in business negotiations',
+      items: [
+        { label: 'Mirroring — repeat the last 3 words to keep them talking', color: '#ec4899' },
+        { label: 'Labeling — name their emotion: "It seems like you\'re frustrated…"', color: '#a855f7' },
+        { label: 'Calibrated Questions — "How am I supposed to do that?" shifts burden', color: '#6366f1' },
+        { label: 'The Accusation Audit — list every bad thing they might think of you, first', color: '#3b82f6' },
+      ],
+      insight: 'The secret: "No" is not the end. It\'s the beginning. Getting someone to say "no" makes them feel safe and in control — and paradoxically moves the negotiation forward faster than chasing "yes."',
+    },
+  },
+  {
+    id: 'nstd-003', type: 'insight', bookId: 'never-split',
+    bookTitle: 'Never Split the Difference', author: 'Chris Voss',
+    pillars: ['Communication','Leadership'], difficulty: 'Intermediate',
+    content: {
+      headline: '"That\'s Right" Is the Gold Standard',
+      body: 'There is a massive difference between "you\'re right" (which ends a conversation) and "that\'s right" (which confirms you truly understand someone). When the other side says "that\'s right," they feel genuinely heard — and only then will they engage with your perspective.',
+      example: 'In salary negotiations, instead of arguing your case, use a summary: "So what I\'m hearing is that budget is tight, headcount is being watched, but you need someone who can hit the ground running on day one — is that right?" When they say "that\'s right," the door opens.',
+    },
+  },
+  {
+    id: 'nstd-004', type: 'stat', bookId: 'never-split',
+    bookTitle: 'Never Split the Difference', author: 'Chris Voss',
+    pillars: ['Communication'], difficulty: 'Beginner',
+    content: {
+      number: '7%',
+      label: 'of communication is the actual words we say',
+      context: 'The other 93% is tone of voice (38%) and body language (55%). Voss\'s lesson: master your vocal tone first. The "late-night FM DJ voice" — slow, calm, downward inflection — can de-escalate almost any tense conversation.',
+    },
+  },
+
+  // ── INFLUENCE (Robert Cialdini) ──
+  {
+    id: 'inf-001', type: 'quote', bookId: 'influence',
+    bookTitle: 'Influence', author: 'Robert Cialdini',
+    pillars: ['Marketing','Communication'], difficulty: 'Beginner',
+    content: {
+      quote: 'The truly gifted negotiator, then, is one whose initial position is exaggerated enough to allow for a series of concessions that will yield a desirable final offer from the opponent.',
+      context: 'Cialdini spent 35 years studying the science of influence. The result: six universal principles that shape human behavior — and that every marketer, leader, and salesperson must understand.',
+    },
+  },
+  {
+    id: 'inf-002', type: 'framework', bookId: 'influence',
+    bookTitle: 'Influence', author: 'Robert Cialdini',
+    pillars: ['Marketing','Communication'], difficulty: 'Intermediate',
+    content: {
+      title: 'Cialdini\'s 6 Principles of Influence',
+      subtitle: 'The psychological levers that move human decision-making',
+      items: [
+        { label: 'Reciprocity — give first; people feel obligated to return favors', color: '#ef4444' },
+        { label: 'Commitment & Consistency — small yeses lead to bigger yeses', color: '#f97316' },
+        { label: 'Social Proof — "everyone else is doing it" drives behavior', color: '#eab308' },
+        { label: 'Authority — credentials and expertise command compliance', color: '#22c55e' },
+        { label: 'Liking — we say yes to people we know, like, and trust', color: '#3b82f6' },
+        { label: 'Scarcity — perceived rarity increases perceived value', color: '#a855f7' },
+      ],
+      insight: 'Cialdini later added a 7th: Unity — the shared identity principle ("we" vs. "they"). People comply with those who share their group identity far more readily than with outsiders.',
+    },
+  },
+  {
+    id: 'inf-003', type: 'insight', bookId: 'influence',
+    bookTitle: 'Influence', author: 'Robert Cialdini',
+    pillars: ['Marketing'], difficulty: 'Intermediate',
+    content: {
+      headline: 'Social Proof Is Your Most Powerful Marketing Tool',
+      body: 'People look to others to determine correct behavior, especially in uncertain situations. This is why testimonials, reviews, and "most popular" labels work so powerfully. The effect amplifies when the people being referenced are similar to the audience.',
+      example: 'When Cialdini tested hotel towel reuse cards, "Most guests reuse their towels" outperformed environmental messaging. But "Most guests in THIS ROOM reuse their towels" performed even better — similarity is the amplifier.',
+    },
+  },
+
+  // ── THE INNOVATOR'S DILEMMA (Clayton Christensen) ──
+  {
+    id: 'id-001', type: 'quote', bookId: 'innovators-dilemma',
+    bookTitle: "The Innovator's Dilemma", author: 'Clayton Christensen',
+    pillars: ['Strategy','Operations'], difficulty: 'Advanced',
+    content: {
+      quote: 'The reason why it is so difficult for existing firms to capitalize on disruptive innovations is that their processes and their business model that make them such capable competitors also make them blind to disruption.',
+      context: 'Christensen studied 17 industries and discovered a paradox: well-managed companies that do everything right still lose to upstarts. Doing the "right thing" for current customers is precisely what exposes you to disruption.',
+    },
+  },
+  {
+    id: 'id-002', type: 'framework', bookId: 'innovators-dilemma',
+    bookTitle: "The Innovator's Dilemma", author: 'Clayton Christensen',
+    pillars: ['Strategy'], difficulty: 'Advanced',
+    content: {
+      title: 'Sustaining vs. Disruptive Innovation',
+      subtitle: 'Two types of innovation with completely different rules',
+      items: [
+        { label: 'Sustaining Innovation — makes good products better for existing customers', color: '#3b82f6' },
+        { label: 'Disruptive Innovation — starts worse, targets non-consumers or low end', color: '#ef4444' },
+        { label: 'The Trap — incumbents optimize for sustaining, ignore disruption', color: '#f97316' },
+        { label: 'The Escape — create an autonomous unit free from existing business model', color: '#22c55e' },
+      ],
+      insight: 'Disruption is not about technology — it\'s about business models. The iPhone wasn\'t revolutionary because it was a great phone; it was revolutionary because it created an ecosystem (App Store) that incumbents couldn\'t replicate without destroying their existing business.',
+    },
+  },
+  {
+    id: 'id-003', type: 'insight', bookId: 'innovators-dilemma',
+    bookTitle: "The Innovator's Dilemma", author: 'Clayton Christensen',
+    pillars: ['Strategy','Operations'], difficulty: 'Advanced',
+    content: {
+      headline: 'Disruptive Products Start Worse — That\'s the Point',
+      body: 'Disruptive innovations initially underperform established products in mainstream markets. Early disk drives were smaller and less capable. Early online retail had less selection than physical stores. Early streaming had less content than cable. Incumbents rationally ignore them — until it\'s too late.',
+      example: 'Netflix launched with 1,000 DVD titles by mail. Blockbuster had 85,000 in-store. No rational Blockbuster executive would have bet their career on pivoting to a worse product. This rational decision-making is exactly what Christensen calls "the innovator\'s dilemma."',
+    },
+  },
+
+  // ── THE HARD THING ABOUT HARD THINGS (Ben Horowitz) ──
+  {
+    id: 'hth-001', type: 'quote', bookId: 'hard-thing',
+    bookTitle: 'The Hard Thing About Hard Things', author: 'Ben Horowitz',
+    pillars: ['Leadership','Entrepreneurship'], difficulty: 'Intermediate',
+    content: {
+      quote: 'There\'s no recipe for really complex, dynamic situations. That\'s the hard thing about hard things — there is no formula for dealing with them.',
+      context: 'Horowitz co-founded Andreessen Horowitz after taking Opsware from near-bankruptcy to a $1.6B acquisition. Unlike most business books, this one doesn\'t sugarcoat the brutal reality of running a company.',
+    },
+  },
+  {
+    id: 'hth-002', type: 'insight', bookId: 'hard-thing',
+    bookTitle: 'The Hard Thing About Hard Things', author: 'Ben Horowitz',
+    pillars: ['Leadership'], difficulty: 'Intermediate',
+    content: {
+      headline: 'Peacetime CEO vs. Wartime CEO',
+      body: 'Horowitz distinguishes two modes of leadership. Peacetime CEOs expand the market, focus on culture, and develop people. Wartime CEOs violate every management principle to survive an existential threat — they\'re direct, decisive, and sometimes brutal. Most leadership advice is written for peacetime. Most startups need wartime skills.',
+      example: 'Andy Grove at Intel during the memory chip crisis had to fire his closest colleagues and exit Intel\'s core business. Steve Jobs returning to Apple had to cancel 70% of products and fire 3,000 people in his first year. Peacetime rules don\'t apply when the company is at war.',
+    },
+  },
+  {
+    id: 'hth-003', type: 'framework', bookId: 'hard-thing',
+    bookTitle: 'The Hard Thing About Hard Things', author: 'Ben Horowitz',
+    pillars: ['Leadership','Entrepreneurship'], difficulty: 'Intermediate',
+    content: {
+      title: 'The Struggle: What No One Tells You',
+      subtitle: 'The psychological reality of building something hard',
+      items: [
+        { label: 'The Struggle is when you wonder why you started — it\'s normal', color: '#f43f5e' },
+        { label: 'Don\'t put it all on your shoulders — share the burden with your team', color: '#f97316' },
+        { label: 'This is not checkers, it\'s chess — the rules change constantly', color: '#eab308' },
+        { label: 'Play long enough and you might get lucky — persistence is strategy', color: '#22c55e' },
+      ],
+      insight: 'Most CEOs hide their fear from employees. Horowitz argues the opposite: be honest about the situation, share the burden, and let your team help solve the problem. Transparency under pressure builds trust that survives for years.',
+    },
+  },
+  {
+    id: 'hth-004', type: 'stat', bookId: 'hard-thing',
+    bookTitle: 'The Hard Thing About Hard Things', author: 'Ben Horowitz',
+    pillars: ['Leadership'], difficulty: 'Beginner',
+    content: {
+      number: '1%',
+      label: 'of decisions that are truly hard to make',
+      context: '99% of management decisions are easy: you know what the right answer is and you do it. The hard 1% — laying off your best friend, firing the person who built the company with you, choosing between two catastrophically bad options — that\'s what the book is actually about.',
+    },
+  },
+
+  // ── CROSSING THE CHASM (Geoffrey Moore) ──
+  {
+    id: 'cc-001', type: 'quote', bookId: 'crossing-chasm',
+    bookTitle: 'Crossing the Chasm', author: 'Geoffrey Moore',
+    pillars: ['Marketing','Strategy'], difficulty: 'Intermediate',
+    content: {
+      quote: 'The chasm represents the gulf between two distinct marketplaces for technology products: the early market, made up of early adopters, and the mainstream market, made up of the early majority.',
+      context: 'Moore discovered that most technology companies fail not because of bad products, but because they can\'t bridge the gap between enthusiast early adopters and the pragmatic mainstream buyers who make up 2/3 of the market.',
+    },
+  },
+  {
+    id: 'cc-002', type: 'framework', bookId: 'crossing-chasm',
+    bookTitle: 'Crossing the Chasm', author: 'Geoffrey Moore',
+    pillars: ['Marketing','Strategy'], difficulty: 'Intermediate',
+    content: {
+      title: 'The Technology Adoption Lifecycle',
+      subtitle: 'Five distinct customer segments that technology crosses through',
+      items: [
+        { label: 'Innovators (2.5%) — technology enthusiasts; buy anything new', color: '#6366f1' },
+        { label: 'Early Adopters (13.5%) — visionaries; buy into the dream', color: '#3b82f6' },
+        { label: 'THE CHASM — the gap most products fall into and die', color: '#ef4444' },
+        { label: 'Early Majority (34%) — pragmatists; want proven solutions', color: '#22c55e' },
+        { label: 'Late Majority (34%) — conservatives; buy when it\'s standard', color: '#eab308' },
+      ],
+      insight: 'The fatal mistake: assuming that selling to early adopters means you\'re ready for the mainstream. Pragmatists don\'t trust visionaries\' referrals. They want references from other pragmatists. This is why crossing the chasm requires a completely different go-to-market strategy.',
+    },
+  },
+  {
+    id: 'cc-003', type: 'insight', bookId: 'crossing-chasm',
+    bookTitle: 'Crossing the Chasm', author: 'Geoffrey Moore',
+    pillars: ['Marketing'], difficulty: 'Advanced',
+    content: {
+      headline: 'The "Bowling Alley" Strategy: Own One Niche Completely',
+      body: 'To cross the chasm, focus on a single beachhead market — one specific segment where you can be the undisputed leader. Own it completely before expanding. Use each niche win as a reference and springboard into adjacent markets. This is the bowling pin model: knock down one pin at a time.',
+      example: 'Salesforce started by targeting small sales teams who couldn\'t afford enterprise CRM. They dominated that niche, then used that dominance to expand upmarket. They never tried to serve everyone at once.',
     },
   },
 
