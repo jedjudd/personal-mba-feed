@@ -23,6 +23,7 @@ function cacheClear(prefix = '') {
     if (k && k.startsWith(CACHE_PREFIX + prefix)) keys.push(k);
   }
   keys.forEach(k => localStorage.removeItem(k));
+  _feedShuffles.clear();
 }
 
 // ── PROGRESS (persisted locally as source of truth for single user) ───────────
@@ -123,15 +124,24 @@ function getShuffledFeed(pillarFilter) {
 
 // ── DATA ACCESS ───────────────────────────────────────────────────────────────
 async function fetchFeed(page = 1, pillarFilter = null) {
-  const params = { action: 'feed', page, limit: CONFIG.postsPerPage };
-  if (pillarFilter) params.pillar = pillarFilter;
-  const remote = await apiFetch(params);
-  if (!remote) {
-    const shuffled = getShuffledFeed(pillarFilter);
-    const start = (page - 1) * CONFIG.postsPerPage;
-    return { posts: shuffled.slice(start, start + CONFIG.postsPerPage), total: shuffled.length };
+  const key = pillarFilter || '__all__';
+  if (!_feedShuffles.has(key)) {
+    const allPosts = await fetchAllPosts();
+    const posts = pillarFilter
+      ? allPosts.filter(p => p.pillars && p.pillars.includes(pillarFilter))
+      : allPosts;
+    const byBook = {};
+    posts.forEach(p => { const k = p.bookId || 'misc'; (byBook[k] = byBook[k] || []).push(p); });
+    const queues = _shuffle(Object.values(byBook)).map(g => _shuffle(g));
+    const result = [];
+    while (queues.some(q => q.length > 0)) {
+      queues.forEach(q => { if (q.length > 0) result.push(q.shift()); });
+    }
+    _feedShuffles.set(key, result);
   }
-  return remote;
+  const shuffled = _feedShuffles.get(key);
+  const start = (page - 1) * CONFIG.postsPerPage;
+  return { posts: shuffled.slice(start, start + CONFIG.postsPerPage), total: shuffled.length };
 }
 
 async function fetchBooks() {
@@ -151,7 +161,9 @@ async function fetchAllPosts() {
 async function fetchBookmarks() {
   const p = Progress.get();
   const ids = Object.keys(p.bookmarks).filter(id => p.bookmarks[id]);
-  const posts = SEED_POSTS.filter(p => ids.includes(p.id));
+  if (!ids.length) return { posts: [] };
+  const allPosts = await fetchAllPosts();
+  const posts = allPosts.filter(post => ids.includes(post.id));
   return { posts };
 }
 

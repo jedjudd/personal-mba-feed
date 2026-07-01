@@ -1,5 +1,14 @@
 // ── LESSON SLIDE GENERATOR ────────────────────────────────────────────────────
 
+function _shuffleQuiz(q) {
+  const opts = q.options.map((opt, i) => ({ opt, correct: i === q.correct }));
+  for (let i = opts.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [opts[i], opts[j]] = [opts[j], opts[i]];
+  }
+  return { ...q, options: opts.map(o => o.opt), correct: opts.findIndex(o => o.correct) };
+}
+
 function generateLessonSlides(post) {
   const slides = [];
   const c = post.content;
@@ -16,9 +25,9 @@ function generateLessonSlides(post) {
       slides.push({ icon: '⚡', label: 'Application', title: 'Put It Into Practice',
         body: `<p>Ask yourself:</p><ul class="dl-list"><li>Where in your work does "good enough" hold you back from being great?</li><li>What one area could you pursue excellence in right now?</li><li>What would you need to stop doing to make room for it?</li></ul>` });
       slides.push({ type: 'quiz', icon: '🎯', label: 'Check Your Thinking', title: 'Quick Reflection',
-        quiz: { q: `What does this quote argue is the primary obstacle to achieving greatness?`,
+        quiz: _shuffleQuiz({ q: `What does this quote argue is the primary obstacle to achieving greatness?`,
           options: ['External competition', 'Accepting "good" as sufficient', 'Lack of talent', 'Insufficient resources'],
-          correct: 1, explanation: 'Settling for "good" removes the urgency needed to become truly great. The enemy is internal complacency, not external forces.' } });
+          correct: 1, explanation: 'Settling for "good" removes the urgency needed to become truly great. The enemy is internal complacency, not external forces.' }) });
       break;
 
     case 'framework':
@@ -31,9 +40,9 @@ function generateLessonSlides(post) {
       if (c.insight) slides.push({ icon: '💡', label: 'Real World', title: 'In Practice',
         body: `<p>${c.insight}</p>` });
       slides.push({ type: 'quiz', icon: '🎯', label: 'Test Yourself', title: 'Framework Check',
-        quiz: { q: `The primary purpose of the ${c.title} framework is to:`,
+        quiz: _shuffleQuiz({ q: `The primary purpose of the ${c.title} framework is to:`,
           options: ['Maximize short-term profit', 'Focus energy on what matters most', 'Eliminate all risk', 'Scale the team quickly'],
-          correct: 1, explanation: `Frameworks like ${c.title} cut through complexity so you can direct your limited resources to the highest-leverage activities.` } });
+          correct: 1, explanation: `Frameworks like ${c.title} cut through complexity so you can direct your limited resources to the highest-leverage activities.` }) });
       break;
 
     case 'insight':
@@ -46,9 +55,9 @@ function generateLessonSlides(post) {
       slides.push({ icon: '⚡', label: 'Application', title: 'Your Turn',
         body: `<p>How does this insight change your thinking?</p><ul class="dl-list"><li>Where do you see this pattern in your current work?</li><li>What decision would you make differently knowing this?</li><li>Who else in your organization needs to hear this?</li></ul>` });
       slides.push({ type: 'quiz', icon: '🎯', label: 'Quiz', title: 'Check Understanding',
-        quiz: { q: `What is the central argument of "${c.headline}"?`,
-          options: ['Success is primarily luck-driven', c.body.length > 90 ? c.body.substring(0, 88) + '…' : c.body, 'Competition always drives improvement', 'Larger teams produce better results'],
-          correct: 1, explanation: `This insight from ${post.bookTitle} challenges conventional thinking and rewards those who internalize it.` } });
+        quiz: _shuffleQuiz({ q: `What is the central argument of "${c.headline}"?`,
+          options: ['Success is primarily luck-driven', c.body.substring(0, 50) + (c.body.length > 50 ? '…' : ''), 'Competition always drives improvement', 'Larger teams produce better results'],
+          correct: 1, explanation: `This insight from ${post.bookTitle} challenges conventional thinking and rewards those who internalize it.` }) });
       break;
 
     case 'carousel':
@@ -68,9 +77,9 @@ function generateLessonSlides(post) {
       slides.push({ icon: '⚡', label: 'Implications', title: 'So What?',
         body: `<p>This data from <em>${post.bookTitle}</em> should shift how you think about:</p><ul class="dl-list"><li>Assumptions you're making in your current strategy</li><li>Decisions based on conventional wisdom instead of evidence</li><li>Where to concentrate resources for maximum impact</li></ul>` });
       slides.push({ type: 'quiz', icon: '🎯', label: 'Quiz', title: 'Test Your Memory',
-        quiz: { q: `The statistic "${c.number}" specifically measures:`,
+        quiz: _shuffleQuiz({ q: `The statistic "${c.number}" specifically measures:`,
           options: ['A general industry trend', c.label, 'A one-time historical anomaly', 'A metric relevant only to large companies'],
-          correct: 1, explanation: `Data gains power through context. This figure from ${post.bookTitle} matters because it quantifies: ${c.label}.` } });
+          correct: 1, explanation: `Data gains power through context. This figure from ${post.bookTitle} matters because it quantifies: ${c.label}.` }) });
       break;
 
     case 'reflection':
@@ -119,6 +128,7 @@ const DetailView = {
   slides: [],
   current: 0,
   quizAnswered: {},
+  _quizRecorded: false,
   _touchStartX: 0,
 
   open(postId) {
@@ -129,6 +139,7 @@ const DetailView = {
     this.slides = generateLessonSlides(post);
     this.current = 0;
     this.quizAnswered = {};
+    this._quizRecorded = false;
     this.render();
     const overlay = document.getElementById('detail-overlay');
     overlay.classList.remove('hidden');
@@ -309,10 +320,32 @@ const DetailView = {
       </div>`;
   },
 
+  _maybeRecordQuiz() {
+    if (this._quizRecorded) return;
+    const quizSlides = this.slides.filter(s => s.type === 'quiz' && s.quiz);
+    if (!quizSlides.length) return;
+    const allAnswered = quizSlides.every(s => {
+      const qi = s.quiz.qi !== undefined ? s.quiz.qi : 'gen';
+      return this.quizAnswered[qi] !== undefined;
+    });
+    if (!allAnswered) return;
+    this._quizRecorded = true;
+    const correct = quizSlides.filter(s => {
+      const qi = s.quiz.qi !== undefined ? s.quiz.qi : 'gen';
+      return this.quizAnswered[qi] === s.quiz.correct;
+    }).length;
+    const firstTime = recordQuizResult(this.post.id, correct, quizSlides.length, this.post.pillars);
+    if (firstTime) {
+      showToast(`+${XP_REWARDS.quizComplete + correct * XP_REWARDS.quizCorrect} XP — Quiz complete! ${correct}/${quizSlides.length} correct`);
+      App.renderHeader();
+    }
+  },
+
   answerQuiz(qi, selected, correct) {
     if (this.quizAnswered[qi] !== undefined) return;
     this.quizAnswered[qi] = selected;
     Log.info('quiz_answer', `qi=${qi} selected=${selected} correct=${correct} isCorrect=${selected===correct}`);
+    this._maybeRecordQuiz();
     this.renderSlide();
     App.renderHeader();
   },
@@ -329,7 +362,7 @@ const DetailView = {
       // Strip HTML tags to get plain text
       const tmp = document.createElement('div');
       tmp.innerHTML = slide.body;
-      excerpt = tmp.textContent.trim().substring(0, 200);
+      excerpt = tmp.textContent.trim();
     }
     if (!excerpt) excerpt = slide.title || post.bookTitle;
 
